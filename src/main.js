@@ -11,7 +11,7 @@ Vue.prototype.$bus = new Vue();
 Vue.prototype.$axios = axios;
 Vue.config.productionTip = false;
 // 设置全局的代理请求头
-axios.defaults.baseURL = '/proxy'
+axios.defaults.baseURL = '/proxy';
 for (var m in filters) {
   Vue.filter(m, filters[m]);
 }
