@@ -43,7 +43,7 @@
 }
 /* element-ui样式修改 */
 .el-menu-item-group__title{
-  padding: 0 !important;
+  padding: 0;
 }
 .el-submenu .el-menu-item{
   background-color: #1f2d3d !important;

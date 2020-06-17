@@ -1,6 +1,5 @@
 module.exports = {
-  // 代码规范检查
-  lintOnSave: false,
+  lintOnSave: true,
   productionSourceMap: false,
   devServer: {
     // 环境配置

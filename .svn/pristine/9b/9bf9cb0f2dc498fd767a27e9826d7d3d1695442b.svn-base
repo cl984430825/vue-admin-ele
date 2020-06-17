@@ -16,8 +16,10 @@
             <span class="userImg_name">{{ loginUsername }}</span>
           </div>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="1">修改密码</el-dropdown-item>
-            <el-dropdown-item command="2">退出登录</el-dropdown-item>
+            <el-dropdown-item command="1">设置</el-dropdown-item>
+            <el-dropdown-item command="2">个人中心</el-dropdown-item>
+            <el-dropdown-item command="3">修改密码</el-dropdown-item>
+            <el-dropdown-item command="4">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -42,7 +44,7 @@ export default {
   methods: {
     // 选择用户下拉列表项
     handleCommand(e) {
-      if (e === "2") {
+      if (e === "4") {
         this.$confirm("确定要退出登录吗？", "提示", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",

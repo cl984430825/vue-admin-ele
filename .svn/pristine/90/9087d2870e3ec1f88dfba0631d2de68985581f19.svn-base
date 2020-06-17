@@ -4,7 +4,6 @@
       style="height:100%"
       :collapse="isCollapse"
       :router="true"
-      :unique-opened="true"
       :default-active="asideCurrentId"
       class="el-menu-vertical-demo asideMenuCls"
       background-color="#304156"
