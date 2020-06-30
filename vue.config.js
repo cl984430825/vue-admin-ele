@@ -10,11 +10,11 @@ module.exports = {
     hotOnly: false,
     open: true, //配置自动启动浏览器
     proxy: {
-      "/api": {
-        target: "<url>",
+      "/proxy": {
+        target: "http://192.9.100.116:8088",
         changeOrigin: true,
         pathRewrite: {
-          "/^api": ""
+          "^/proxy": ""
         }
       }
     }

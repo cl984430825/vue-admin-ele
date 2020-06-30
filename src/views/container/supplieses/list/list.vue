@@ -4,16 +4,16 @@
       <div class="searchBox">
         <div class="flexBox">
           <div class="flexBox">
-            <span class="labelCls">关键词：</span>
+            <span class="labelCls">物资编号：</span>
             <el-input
             clearable 
-            v-model="searchVal" 
+            v-model="no" 
             style="width:260px"
-            placeholder="物资ID/物资名称/供应商"></el-input>
+            placeholder="请输入物资编号"></el-input>
           </div>
           <div class="flexBox _left">
             <span class="labelCls">类型：</span>
-            <el-select clearable v-model="type" style="width:260px" placeholder="请选择类型">
+            <el-select clearable v-model="status" style="width:260px" placeholder="请选择类型">
               <el-option
                 v-for="(item, index) in typeList"
                 :key="index"
@@ -23,7 +23,7 @@
             </el-select>
           </div>
           <div class="flexBox _left">
-            <el-button size="medium" type="primary">查询</el-button>
+            <el-button @click="getMaterialsList" size="medium" type="primary">查询</el-button>
             <el-button size="medium">重置</el-button>
           </div>
         </div>
@@ -37,7 +37,7 @@
           <el-button size="medium">批量入库</el-button>
           <span class="labelCls blueText _left">下载批量入库模板</span>
         </div>
-        <el-table border :data="tableData" class="_top">
+        <el-table border :data="tableData" class="_top" :header-cell-style="{background:'#F6F5F4'}">
           <el-table-column label="物资ID">-</el-table-column>
           <el-table-column label="物资名称">-</el-table-column>
           <el-table-column label="品牌/型号">-</el-table-column>
@@ -69,14 +69,14 @@ export default {
   },
   data () {
     return {
-      // 检索项-关键词
-      searchVal: "",
+      // 检索项-物资编号
+      no: "",
       // 检索项-类型
-      type: "",
+      status: "",
       // 类型列表
-      typeList: ["固定资产"],
+      typeList: ["未出库", "已出库"],
       // 表单数据
-      tableData: [1,2,3],
+      tableData: [],
       // 分页配置项
       pageConfig: {
         pageNum: 1,
@@ -85,7 +85,26 @@ export default {
       }
     }
   },
+  mounted(){
+    this.getMaterialsList()
+  },
   methods: {
+    // 获取物资列表
+    getMaterialsList(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/materials",
+        params: {
+          no: this.no,
+          status: this.status,
+          pageNum: this.pageConfig.pageNum,
+          pageSize: this.pageConfig.pageSize
+        }
+      }).then(res=>{
+        this.tableData = res.data.list;
+        this.pageConfig.total = res.data.total;
+      })
+    },
     // 新建物资
     addSuppliese(){
       this.$router.push("/supplieses/add");

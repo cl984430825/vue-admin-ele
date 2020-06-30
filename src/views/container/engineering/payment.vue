@@ -5,23 +5,15 @@
         <div class="flexBox _bottom">
           <div class="flexBox">
             <span class="labelCls searchLabel">工程名称：</span>
-            <el-input clearable v-model="gcname" placeholder="请输入工程名称"></el-input>
+            <el-input clearable v-model="engineeringName" style="width:260px" placeholder="请输入工程名称"></el-input>
           </div>
           <div class="flexBox _left">
-            <span class="labelCls searchLabel">合同号：</span>
-            <el-input clearable v-model="htNum" placeholder="请输入合同号"></el-input>
-          </div>
-          <div class="flexBox _left">
-            <span class="labelCls searchLabel">合同对方：</span>
-            <el-input clearable v-model="htdf" placeholder="请输入合同对方"></el-input>
+            <span class="labelCls searchLabel">付款金额：</span>
+            <el-input clearable v-model="payedMoney" style="width:260px" placeholder="请输入付款金额"></el-input>
           </div>
         </div>
         <div class="flexBox" style="flex-wrap:wrap">
-          <div class="flexBox _bottom">
-            <span class="labelCls searchLabel">合同金额：</span>
-            <el-input clearable v-model="htMoney" placeholder="请输入合同金额"></el-input>
-          </div>
-          <div class="flexBox _left _right _bottom">
+          <div class="flexBox _right">
             <span class="labelCls searchLabel">付款时间：</span>
             <el-date-picker
               v-model="payTime"
@@ -31,9 +23,9 @@
               end-placeholder="结束日期">
             </el-date-picker>
           </div>
-          <div class="flexBox _left _bottom">
-            <el-button type="primary" size="medium">查询</el-button>
-            <el-button size="medium">重置</el-button>
+          <div class="flexBox _left">
+            <el-button @click="getPaymentList" type="primary" size="medium">查询</el-button>
+            <el-button @click="reset" size="medium">重置</el-button>
           </div>
         </div>
       </div>
@@ -42,17 +34,20 @@
           <i class="el-icon-download"></i>
           <span>导出</span>
         </el-button>
-        <el-table border :data="tableData" class="_top">
-          <el-table-column label="编号">1001</el-table-column>
-          <el-table-column label="工程名称">杭州呈安科技</el-table-column>
-          <el-table-column label="合同号">JR-XNY-2020-YW-011</el-table-column>
-          <el-table-column label="项目内容">采购合同</el-table-column>
-          <el-table-column label="合同对方">杭州呈安科技有限公司</el-table-column>
-          <el-table-column label="合同金额">100,800</el-table-column>
-          <el-table-column label="付款金额">10,800</el-table-column>
-          <el-table-column label="付款时间">2020-06-01</el-table-column>
+        <el-table border :data="tableData" class="_top" :header-cell-style="{background:'#F6F5F4'}">
+          <el-table-column label="工程名称" prop="engineeringName"></el-table-column>
+          <el-table-column label="合同编号" prop="contractNo"></el-table-column>
+          <el-table-column label="项目内容" prop="projectName"></el-table-column>
+          <el-table-column label="合同对方" prop="contractParty"></el-table-column>
+          <el-table-column label="合同金额" prop="contractMoney">
+            <template slot-scope="scope">{{scope.row.contractMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="付款金额" prop="payedMoney">
+            <template slot-scope="scope">{{scope.row.payedMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="付款时间" prop="payTime"></el-table-column>
         </el-table>
-        <Page :pageConfig="pageConfig" />
+        <Page :pageConfig="pageConfig" @cutPage="cutPage" />
       </div>
     </div>
   </div>
@@ -67,17 +62,13 @@ export default {
   data () {
     return {
       // 检索项-工程名称
-      gcname: "",
-      // 检索项-合同号
-      htNum: "",
-      // 检索项-合同对方
-      htdf: "",
+      engineeringName: "",
       // 检索项-合同金额
-      htMoney: "",
+      payedMoney: "",
       // 检索项-付款时间
       payTime: [],
       // 项目列表数据
-      tableData: [1,2,3,4,5],
+      tableData: [],
       // 分页配置项
       pageConfig: {
         pageNum: 1,
@@ -85,13 +76,47 @@ export default {
         total: 0
       }
     }
+  },
+  mounted(){
+    this.getPaymentList()
+  },
+  methods: {
+    // 获取付款列表数据
+    getPaymentList(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/paymentRecords",
+        params: {
+          engineeringName: this.engineeringName,
+          payedMoney: this.payedMoney,
+          payTime: this.payTime,
+          pageNum: this.pageConfig.pageNum,
+          pageSize: this.pageConfig.pageSize
+        }
+      }).then(res=>{
+        this.tableData = res.data.list;
+        this.pageConfig.total = res.data.total;
+      })
+    },
+    // 重置检索项
+    reset(){
+      this.engineeringName = "";
+      this.payedMoney = "";
+      this.payTime = [];
+      this.getPaymentList()
+    },
+    // 切换页码
+    cutPage(e){
+      this.pageConfig.pageNum = e;
+      this.getPaymentList()
+    }
   }
 }
 </script>
 
 <style scoped>
 .searchBox{
-  padding: 20px 20px 0 20px;
+  padding: 20px;
   background: #ffffff;
 }
 .searchLabel{

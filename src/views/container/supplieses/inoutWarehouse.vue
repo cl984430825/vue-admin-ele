@@ -55,7 +55,7 @@
           <i class="el-icon-download"></i>
           <span>导出</span>
         </el-button>
-        <el-table border :data="tableData" class="_top">
+        <el-table border :data="tableData" class="_top" :header-cell-style="{background:'#F6F5F4'}">
           <el-table-column label="物资名称">充电桩</el-table-column>
           <el-table-column label="供应商">杭州呈安科技</el-table-column>
           <el-table-column label="物资编号">CL001-100</el-table-column>

@@ -4,47 +4,34 @@
       <div class="searchBox">
         <div class="flexBox _bottom">
           <div class="flexBox">
-            <span class="labelCls searchLabel">合同号：</span>
-            <el-input clearable v-model="htNum" placeholder="请输入合同号"></el-input>
+            <span class="labelCls searchLabel">发票编号：</span>
+            <el-input clearable v-model="invoiceNo" style="width:260px" placeholder="请输入发票编号"></el-input>
           </div>
           <div class="flexBox _left">
-            <span class="labelCls searchLabel">发票号：</span>
-            <el-input clearable v-model="invoiceNum" placeholder="请输入发票号"></el-input>
-          </div>
-          <div class="flexBox _left">
-            <span class="labelCls searchLabel">关键词：</span>
-            <el-input 
-            clearable 
-            v-model="searchVal" 
-            style="width:220px" 
-            placeholder="工程名/合同对方/项目内容"></el-input>
+            <span class="labelCls searchLabel">发票类型：</span>
+            <el-select v-model="status" style="width:260px">
+              <el-option
+              :key="index"
+              :label="item"
+              :value="index"
+              v-for="(item, index) in typeList"></el-option>
+            </el-select>
           </div>
         </div>
-        <div class="flexBox" style="flex-wrap:wrap">
-          <div class="flexBox _bottom">
+        <div class="flexBox">
+          <div class="flexBox">
             <span class="labelCls searchLabel">开票日期：</span>
             <el-date-picker
-              v-model="kpPicker"
-              type="date"
-              style="width:200px"
-              placeholder="选择日期">
+              v-model="signTime"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
             </el-date-picker>
           </div>
-          <div class="flexBox _left _right _bottom">
-            <span class="labelCls searchLabel">发票含税：</span>
-            <el-input clearable v-model="fphs" placeholder="请输入发票含税"></el-input>
-          </div>
-          <div class="flexBox _bottom">
-            <span class="labelCls searchLabel">类型：</span>
-            <el-radio-group v-model="invoiceType" size="medium">
-              <el-radio-button label="">全部</el-radio-button>
-              <el-radio-button label="1">已确认</el-radio-button>
-              <el-radio-button label="0">未确认</el-radio-button>
-            </el-radio-group>
-          </div>
-          <div class="flexBox _left _bottom">
-            <el-button type="primary" size="medium">查询</el-button>
-            <el-button size="medium">重置</el-button>
+          <div class="flexBox _left">
+            <el-button @click="getInvoicesList" type="primary" size="medium">查询</el-button>
+            <el-button @click="resetGet" size="medium">重置</el-button>
           </div>
         </div>
       </div>
@@ -53,20 +40,28 @@
           <i class="el-icon-download"></i>
           <span>导出</span>
         </el-button>
-        <el-table border :data="tableData" class="_top">
-          <el-table-column label="发票号">13721871</el-table-column>
-          <el-table-column label="开票日期">2016-09-21</el-table-column>
-          <el-table-column label="发票税率">13.5%</el-table-column>
-          <el-table-column label="发票未税">5000</el-table-column>
-          <el-table-column label="发票含税">5000</el-table-column>
-          <el-table-column label="备注">-</el-table-column>
-          <el-table-column label="工程名称">杭州呈安科技</el-table-column>
-          <el-table-column label="合同号">JR-XNY-2020-YW-011</el-table-column>
-          <el-table-column label="项目内容">杭州呈安科技</el-table-column>
-          <el-table-column label="合同对方">杭州呈安科技</el-table-column>
-          <el-table-column label="状态">未确认</el-table-column>
+        <el-table border :data="tableData" class="_top" :header-cell-style="{background:'#F6F5F4'}">
+          <el-table-column label="发票编号" prop="invoiceNo"></el-table-column>
+          <el-table-column label="开票日期" prop="signTime"></el-table-column>
+          <el-table-column label="发票税率" prop="taxRate">
+            <template slot-scope="scope">{{scope.row.taxRate|CYB}}%</template>
+          </el-table-column>
+          <el-table-column label="发票未税" prop="noTax">
+            <template slot-scope="scope">{{scope.row.noTax|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="发票含税" prop="includeTax">
+            <template slot-scope="scope">{{scope.row.includeTax|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="备注" prop="remark"></el-table-column>
+          <el-table-column label="工程名称" prop="engineeringName"></el-table-column>
+          <el-table-column label="合同编号" prop="contractNo"></el-table-column>
+          <el-table-column label="项目名称" prop="projectName"></el-table-column>
+          <el-table-column label="合同对方" prop="contractParty"></el-table-column>
+          <el-table-column label="状态" prop="status">
+            <template slot-scope="scope">{{scope.row.status==1?'已确认':'未确认'}}</template>
+          </el-table-column>
         </el-table>
-        <Page :pageConfig="pageConfig" />
+        <Page :pageConfig="pageConfig" @cutPage="cutPage" />
       </div>
     </div>
   </div>
@@ -80,20 +75,16 @@ export default {
   },
   data () {
     return {
-      // 检索项-合同号
-      htNum: "",
-      // 检索项-发票号
-      invoiceNum: "",
-      // 检索项-发票含税
-      fphs: "",
-      // 检索项-开票时间
-      kpPicker: "",
-      // 检索项-关键词
-      searchVal: "",
+      // 检索项-发票编号
+      invoiceNo: "",
+      // 检索项-开票日期
+      signTime: [],
       // 发票类型
-      invoiceType: "",
+      status: 0,
+      // 类型列表
+      typeList: ["全部", "已确认", "未确认"],
       // 项目列表数据
-      tableData: [1,2,3,4,5],
+      tableData: [],
       // 分页配置项
       pageConfig: {
         pageNum: 1,
@@ -101,13 +92,46 @@ export default {
         total: 0
       }
     }
+  },
+  mounted(){
+    this.getInvoicesList()
+  },
+  methods: {
+    // 获取发票列表数据
+    getInvoicesList(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/invoices",
+        params: {
+          invoiceNo: this.invoiceNo,
+          status: this.status,
+          pageNum: this.pageConfig.pageNum,
+          pageSize: this.pageConfig.pageSize
+        }
+      }).then(res=>{
+        this.tableData = res.data.list;
+        this.pageConfig.total = res.data.total;
+      })
+    },
+    // 重置检索项
+    resetGet(){
+      this.invoiceNo = "";
+      this.status = 0;
+      this.signTime = [];
+      this.getInvoicesList()
+    },
+    // 切换页码
+    cutPage(e){
+      this.pageConfig.pageNum = e;
+      this.getInvoicesList()
+    }
   }
 }
 </script>
 
 <style scoped>
 .searchBox{
-  padding: 20px 20px 0 20px;
+  padding: 20px;
   background: #ffffff;
 }
 .searchLabel{

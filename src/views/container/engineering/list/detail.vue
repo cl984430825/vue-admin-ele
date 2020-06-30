@@ -1,16 +1,16 @@
 <template>
   <div id="engineerDetail">
     <div class="engineerDetail_container">
-      <el-tabs v-model="activeIndex" @tab-click="handleClick">
+      <el-tabs v-model="activeIndex" @tab-click="cutTabs">
         <el-tab-pane label="基础信息" name="1">
           <div class="one_titleBox">
             <div>
-              <div class="titleCls">余杭组团科创中心停车场充电站投资建设清单</div>
+              <div class="titleCls">{{engineeringInfo.name}}</div>
               <div class="_top one_tagBox">
-                <span class="labelCls">创建人：刘德华</span>
-                <span class="labelCls _left">创建时间：2017-01-10</span>
-                <span class="labelCls _left">工程状态：建设中</span>
-                <span class="labelCls _left">场站：余杭组团科创中心停车场充电站</span>
+                <span class="labelCls">创建人：{{engineeringInfo.createrName}}</span>
+                <span class="labelCls _left">创建时间：{{engineeringInfo.createTime}}</span>
+                <span class="labelCls _left">工程状态：{{engineeringInfo.status==1?'进行中':'已完成'}}</span>
+                <span class="labelCls _left">场站：{{engineeringInfo.stationName}}</span>
               </div>
             </div>
             <div>
@@ -28,39 +28,39 @@
             <div class="ul_box">
               <div class="li_box">
                 <span class="labelCls">合同金额</span>
-                <span class="labelCls moneyNum">296,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.contractMoney|CYB}}</span>
               </div>
               <div class="li_box thredLeft">
                 <span class="labelCls">结算金额</span>
-                <span class="labelCls moneyNum">390,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.settleMoney|CYB}}</span>
               </div>
             </div>
             <div class="ul_box">
               <div class="li_box">
                 <span class="labelCls">已支付</span>
-                <span class="labelCls moneyNum">296,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.payedMoney|CYB}}</span>
               </div>
               <div class="li_box thredLeft">
                 <span class="labelCls">未支付</span>
-                <span class="labelCls moneyNum">390,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.unPayedMoney|CYB}}</span>
               </div>
             </div>
             <div class="ul_box" style="border:0">
               <div class="li_box">
                 <span class="labelCls">发票未税</span>
-                <span class="labelCls moneyNum">296,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.invoiceNoTax|CYB}}</span>
               </div>
               <div class="li_box thredLeft">
                 <span class="labelCls">发票含税</span>
-                <span class="labelCls moneyNum">390,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.invoiceHaveTax|CYB}}</span>
               </div>
               <div class="li_box thredLeft">
                 <span class="labelCls">暂估未税</span>
-                <span class="labelCls moneyNum">390,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.estimateNoTax|CYB}}</span>
               </div>
               <div class="li_box thredLeft">
                 <span class="labelCls">暂估含税</span>
-                <span class="labelCls moneyNum">390,000</span>
+                <span class="labelCls moneyNum">{{engineeringInfo.estimateHaveTax|CYB}}</span>
               </div>
             </div>
           </div>
@@ -69,31 +69,45 @@
           <div class="table_box">
             <el-input 
             clearable
-            v-model="projectSearch"
+            v-model="projectName"
             style="width:300px" 
-            placeholder="批次/编号/发票号">
-              <el-button slot="append" icon="el-icon-search"></el-button>
+            placeholder="项目名称">
+              <el-button @click="getProjectListData" slot="append" icon="el-icon-search"></el-button>
             </el-input>
             <el-table 
             border
             class="_top"
             :data="projectTable"
             :header-cell-style="{background:'#F6F5F4'}">
-              <el-table-column label="合同号" width="200">123</el-table-column>
-              <el-table-column label="项目内容" width="200">123</el-table-column>
-              <el-table-column label="合同金额" width="100">123</el-table-column>
-              <el-table-column label="签订日期" width="100">123</el-table-column>
-              <el-table-column label="合同对方" width="150">123</el-table-column>
-              <el-table-column label="发票含税" width="100">123</el-table-column>
-              <el-table-column label="发票未税" width="100">123</el-table-column>
-              <el-table-column label="暂估含税" width="100">123</el-table-column>
-              <el-table-column label="暂估未税" width="100">123</el-table-column>
-              <el-table-column label="已支付" width="100">123</el-table-column>
-              <el-table-column label="未支付" width="100">123</el-table-column>
-              <el-table-column label="支付方式" width="300">123</el-table-column>
+              <el-table-column label="合同号" prop="contractNo" width="200"></el-table-column>
+              <el-table-column label="项目内容" prop="name" width="200"></el-table-column>
+              <el-table-column label="合同金额" prop="contractMoney" width="100">
+                <template slot-scope="scope">{{scope.row.contractMoney|CYB}}</template>
+              </el-table-column>
+              <el-table-column label="签订日期" prop="contractSignTime" width="100"></el-table-column>
+              <el-table-column label="合同对方" prop="contractParty" width="150"></el-table-column>
+              <el-table-column label="发票含税" prop="invoiceHaveTax" width="100">
+                <template slot-scope="scope">{{scope.row.invoiceHaveTax|CYB}}</template>
+              </el-table-column>
+              <el-table-column label="发票未税" prop="invoiceNoTax" width="100">
+                <template slot-scope="scope">{{scope.row.invoiceNoTax|CYB}}</template>
+              </el-table-column>
+              <el-table-column label="暂估含税" prop="estimateHaveTax" width="100">
+                <template slot-scope="scope">{{scope.row.estimateHaveTax|CYB}}</template>
+              </el-table-column>
+              <el-table-column label="暂估未税" prop="estimateNoTax" width="100">
+                <template slot-scope="scope">{{scope.row.estimateNoTax|CYB}}</template>
+              </el-table-column>
+              <el-table-column label="已支付" prop="payedMoney" width="120">
+                <template slot-scope="scope">{{scope.row.payedMoney|CYB}}</template>
+              </el-table-column>
+              <el-table-column label="未支付" prop="unPayedMoney" width="120">
+                <template slot-scope="scope">{{scope.row.unPayedMoney|CYB}}</template>
+              </el-table-column>
+              <el-table-column label="支付方式" prop="payType" width="120"></el-table-column>
               <el-table-column label="操作" fixed="right" width="160">
-                <template>
-                  <span @click="toInvoice" class="blueText">发票管理</span>
+                <template slot-scope="scope">
+                  <span @click="toInvoice(scope)" class="blueText">发票管理</span>
                   <span class="blueText _left">付款记录</span>
                 </template>
               </el-table-column>
@@ -138,14 +152,27 @@ export default {
   },
   data () {
     return {
+      // 当前所选的工程ID
+      engineeringID: "",
       // tab选中项
       activeIndex: "1",
-      // 项目信息索引项
-      projectSearch: "",
+      // 检索项-项目名称
+      projectName: "",
       // 物资信息索引项
       engineerSearch: "",
+      // 项目基础信息
+      engineeringInfo: {
+        contractMoney: 0,
+        settleMoney: 0,
+        payedMoney: 0,
+        unPayedMoney: 0,
+        invoiceNoTax: 0,
+        invoiceHaveTax: 0,
+        estimateNoTax: 0,
+        estimateHaveTax: 0
+      },
       // 项目信息table
-      projectTable: [1,2,3],
+      projectTable: [],
       // 物资信息table
       engTable: [1,2,3],
       // 项目信息分页配置项
@@ -162,18 +189,64 @@ export default {
       }
     }
   },
+  mounted(){
+    this.engineeringID = this.$router.currentRoute.query.id;
+    this.getEngineeringData()
+  },
   methods: {
+    // 获取工程基础信息
+    getEngineeringData(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/engineerings/view/" + this.engineeringID
+      }).then(res=>{
+        this.engineeringInfo = res.data;
+      })
+    },
+    // 获取工程的项目信息
+    getProjectListData(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/projects",
+        params: {
+          engineeringId: this.engineeringID,
+          name: this.projectName
+        }
+      }).then(res=>{
+        this.projectTable = res.data.list;
+        this.pageConfig.total = res.data.total;
+      })
+    },
     // tab切换触发
-    handleClick () {
-      console.log(this.activeIndex)
+    cutTabs(){
+      switch (this.activeIndex) {
+        case "1":
+          this.getEngineeringData()
+          break;
+        case "2":
+          this.getProjectListData()
+          break;
+        case "3":
+          break;
+      }
     },
     // 编辑项目
     toCompile () {
-      this.$router.push("/engineering/compile");
+      this.$router.push({
+        path: "/engineering/compile",
+        query: {
+          id: this.engineeringID
+        }
+      });
     },
     // 发票管理
-    toInvoice () {
-      this.$router.push("/engineering/invoiceMng");
+    toInvoice(scope){
+      this.$router.push({
+        path: "/engineering/invoiceMng",
+        query: {
+          id: scope.row.id
+        }
+      });
     }
   }
 }

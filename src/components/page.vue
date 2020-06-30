@@ -3,6 +3,7 @@
     <div class="page_container">
       <el-pagination
         background
+        @current-change="cutPage"
         :current-page="pageConfig.pageNum"
         :total="pageConfig.total"
         :page-size="pageConfig.pageSize"
@@ -15,7 +16,12 @@
 <script>
 export default {
   name: "page",
-  props: ["pageConfig"]
+  props: ["pageConfig"],
+  methods: {
+    cutPage(e){
+      this.$emit("cutPage", e);
+    },
+  }
 }
 </script>
 

@@ -4,23 +4,12 @@
       <div class="searchBox">
         <div class="flexBox">
           <div class="flexBox">
-            <span class="labelCls">关键词：</span>
+            <span class="labelCls">供应商：</span>
             <el-input
             clearable 
-            v-model="searchVal" 
+            v-model="supplier" 
             style="width:260px"
-            placeholder="物资ID/物资名称/供应商"></el-input>
-          </div>
-          <div class="flexBox _left">
-            <span class="labelCls">类型：</span>
-            <el-select clearable v-model="type" style="width:260px" placeholder="请选择类型">
-              <el-option
-                v-for="(item, index) in typeList"
-                :key="index"
-                :label="item"
-                :value="index">
-              </el-option>
-            </el-select>
+            placeholder="请输入供应商"></el-input>
           </div>
         </div>
         <div class="flexBox _top">
@@ -45,16 +34,17 @@
           <i class="el-icon-download"></i>
           <span>导出</span>
         </el-button>
-        <el-table border :data="tableData" class="_top">
-          <el-table-column label="物资ID">123</el-table-column>
-          <el-table-column label="物资名称">充电桩</el-table-column>
-          <el-table-column label="供应商">杭州呈安科技</el-table-column>
-          <el-table-column label="结存数量">10</el-table-column>
-          <el-table-column label="单位">台</el-table-column>
-          <el-table-column label="结存金额">15,500</el-table-column>
-          <el-table-column label="统计时间">2020-06-01 00:00:00</el-table-column>
+        <el-table border :data="tableData" class="_top" :header-cell-style="{background:'#F6F5F4'}">
+          <el-table-column label="物资类别名称" prop="typeName"></el-table-column>
+          <el-table-column label="供应商" prop="supplier"></el-table-column>
+          <el-table-column label="结存数量" prop="balanceCount"></el-table-column>
+          <el-table-column label="单位" prop="unit"></el-table-column>
+          <el-table-column label="结存金额" prop="balanceMoney">
+            <template slot-scope="scope">{{scope.row.balanceMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="统计时间" prop="createTime"></el-table-column>
         </el-table>
-        <Page :pageConfig="pageConfig" />
+        <Page :pageConfig="pageConfig" @cutPage="cutPage" />
       </div>
     </div>
   </div>
@@ -68,22 +58,41 @@ export default {
   },
   data () {
     return {
-      // 检索项-关键词
-      searchVal: "",
-      // 检索项-类型
-      type: "",
+      // 检索项-供应商
+      supplier: "",
       // 检索项-时间段
       dateVal: [],
-      // 类型列表
-      typeList: ["固定资产"],
       // 表单数据
-      tableData: [1,2,3],
+      tableData: [],
       // 分页配置项
       pageConfig: {
         pageNum: 1,
         pageSize: 10,
         total: 0
       }
+    }
+  },
+  mounted(){
+    this.getMaterialsBalanceList()
+  },
+  methods: {
+    // 获取物资结存记录列表
+    getMaterialsBalanceList(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/materialBalanceRecords",
+        params: {
+          supplier: this.supplier
+        }
+      }).then(res=>{
+        this.tableData = res.data.list;
+        this.pageConfig.total = res.data.total;
+      })
+    },
+    // 切换页码
+    cutPage(e){
+      this.pageConfig.pageNum = e;
+      this.getMaterialsBalanceList()
     }
   }
 }

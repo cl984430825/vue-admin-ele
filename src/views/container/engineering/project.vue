@@ -5,33 +5,30 @@
         <div class="flexBox">
           <div class="flexBox">
             <span class="labelCls searchLabel">工程名称：</span>
-            <el-input clearable v-model="engname" placeholder="请输入工程名称"></el-input>
+            <el-input clearable v-model="engineeringName" placeholder="请输入工程名称"></el-input>
           </div>
           <div class="flexBox _left">
-            <span class="labelCls searchLabel">合同号：</span>
-            <el-input clearable v-model="htNum" placeholder="请输入合同号"></el-input>
+            <span class="labelCls searchLabel">合同编号：</span>
+            <el-input clearable v-model="contractNo" placeholder="请输入合同编号"></el-input>
           </div>
           <div class="flexBox _left">
-            <span class="labelCls searchLabel">合同金额：</span>
-            <el-input clearable v-model="htMoney" placeholder="请输入合同金额"></el-input>
+            <span class="labelCls searchLabel">合同对方：</span>
+            <el-input clearable v-model="contractParty" placeholder="请输入合同对方"></el-input>
           </div>
         </div>
         <div class="flexBox _top">
           <div class="flexBox">
             <span class="labelCls searchLabel">合同日期：</span>
             <el-date-picker
-              v-model="htPicker"
-              type="date"
-              style="width:200px"
-              placeholder="选择日期">
+              type="daterange"
+              v-model="contractSignTime"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
             </el-date-picker>
           </div>
-          <div class="flexBox _left">
-            <span class="labelCls searchLabel">合同对方：</span>
-            <el-input clearable v-model="htdf" placeholder="请输入合同对方"></el-input>
-          </div>
           <div class="flexBox" style="margin-left:25px">
-            <el-button type="primary" size="medium">查询</el-button>
+            <el-button @click="getProjectList" type="primary" size="medium">查询</el-button>
             <el-button size="medium">重置</el-button>
           </div>
         </div>
@@ -86,28 +83,43 @@
           <i class="el-icon-download"></i>
           <span>导出</span>
         </el-button>
-        <el-table border :data="tableData" class="_top">
-          <el-table-column label="合同号">JR-XNY-2020</el-table-column>
-          <el-table-column label="项目内容">采购合同</el-table-column>
-          <el-table-column label="合同金额">100,800</el-table-column>
-          <el-table-column label="签订日期">2016-09-21</el-table-column>
-          <el-table-column label="合同对方">杭州呈安科技有限公司</el-table-column>
-          <el-table-column label="工程名称">杭州呈安科技</el-table-column>
-          <el-table-column label="发票未税">100,800</el-table-column>
-          <el-table-column label="发票含税">100,800</el-table-column>
-          <el-table-column label="暂估未税">100,800</el-table-column>
-          <el-table-column label="暂估含税">100,800</el-table-column>
-          <el-table-column label="已支付">100,800</el-table-column>
-          <el-table-column label="未支付">100,800</el-table-column>
-          <el-table-column label="发票号">13721871</el-table-column>
+        <el-table border :data="tableData" class="_top" :header-cell-style="{background:'#F6F5F4'}">
+          <el-table-column label="项目名称" prop="name" fixed="left" width="150"></el-table-column>
+          <el-table-column label="合同编号" prop="contractNo" width="150"></el-table-column>
+          <el-table-column label="合同金额" prop="contractMoney">
+            <template slot-scope="scope">{{scope.row.contractMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="签订日期" prop="contractSignTime" width="160"></el-table-column>
+          <el-table-column label="合同对方" prop="contractParty" width="100"></el-table-column>
+          <el-table-column label="工程名称" prop="engineeringName" width="120"></el-table-column>
+          <el-table-column label="发票未税" prop="invoiceNoTax" width="90">
+            <template slot-scope="scope">{{scope.row.invoiceNoTax|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="发票含税" prop="invoiceHaveTax" width="90">
+            <template slot-scope="scope">{{scope.row.invoiceHaveTax|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="暂估未税" prop="estimateNoTax" width="90">
+            <template slot-scope="scope">{{scope.row.estimateNoTax|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="暂估含税" prop="estimateHaveTax" width="90">
+            <template slot-scope="scope">{{scope.row.estimateHaveTax|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="已支付" prop="payedMoney" width="90">
+            <template slot-scope="scope">{{scope.row.payedMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="未支付" prop="unPayedMoney" width="90">
+            <template slot-scope="scope">{{scope.row.unPayedMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="发票号" prop="invoiceNos" width="120"></el-table-column>
         </el-table>
-        <Page :pageConfig="pageConfig" />
+        <Page :pageConfig="pageConfig" @cutPage="cutPage" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import toolkit from "@/toolkit/index";
 export default {
   name: "project",
   components: {
@@ -116,23 +128,48 @@ export default {
   data () {
     return {
       // 检索项-工程名称
-      engname: "",
-      // 检索项-合同号
-      htNum: "",
-      // 检索项-合同金额
-      htMoney: "",
+      engineeringName: "",
+      // 检索项-合同编号
+      contractNo: "",
       // 检索项-合同日期
-      htPicker: "",
+      contractSignTime: [],
       // 检索项-合同对方
-      htdf: "",
+      contractParty: "",
       // 项目列表数据
-      tableData: [1,2,3,4,5],
+      tableData: [],
       // 分页配置项
       pageConfig: {
         pageNum: 1,
         pageSize: 10,
         total: 0
       }
+    }
+  },
+  mounted(){
+    this.getProjectList()
+  },
+  methods: {
+    // 获取项目列表数据
+    getProjectList(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/projects",
+        params: {
+          engineeringName: this.engineeringName,
+          contractNo: this.contractNo,
+          contractParty: this.contractParty,
+          pageNum: this.pageConfig.pageNum,
+          pageSize: this.pageConfig.pageSize
+        }
+      }).then(res=>{
+        this.tableData = res.data.list;
+        this.pageConfig.total = res.data.total;
+      })
+    },
+    // 切换分页
+    cutPage(e){
+      this.pageConfig.pageNum = e;
+      this.getProjectList()
     }
   }
 }
