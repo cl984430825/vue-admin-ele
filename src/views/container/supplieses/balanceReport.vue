@@ -24,8 +24,8 @@
             </el-date-picker>
           </div>
           <div class="flexBox _left">
-            <el-button size="medium" type="primary">查询</el-button>
-            <el-button size="medium">重置</el-button>
+            <el-button @click="getMaterialsBalanceList" size="medium" type="primary">查询</el-button>
+            <el-button @click="reset" size="medium">重置</el-button>
           </div>
         </div>
       </div>
@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import toolkit from "@/toolkit/index";
 export default {
   name: "balanceReport",
   components: {
@@ -82,12 +83,22 @@ export default {
         method: "GET",
         url: "/api/v1/materialBalanceRecords",
         params: {
-          supplier: this.supplier
+          supplier: this.supplier,
+          balanceTimeStart: this.dateVal[0]?toolkit.transitionDate(this.dateVal[0], "YYYY-MM-DD"):'',
+          balanceTimeEnd: this.dateVal[1]?toolkit.transitionDate(this.dateVal[1], "YYYY-MM-DD"):'',
+          pageNum: this.pageConfig.pageNum,
+          pageSize: this.pageConfig.pageSize
         }
       }).then(res=>{
         this.tableData = res.data.list;
         this.pageConfig.total = res.data.total;
       })
+    },
+    // 重置检索项
+    reset(){
+      this.supplier = "";
+      this.dateVal = [];
+      this.getMaterialsBalanceList()
     },
     // 切换页码
     cutPage(e){

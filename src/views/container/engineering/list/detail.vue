@@ -119,9 +119,9 @@
           <div class="table_box">
             <el-input 
               clearable
-              v-model="engineerSearch"
+              v-model="typeName"
               style="width:300px" 
-              placeholder="批次/编号/发票号">
+              placeholder="物资名称">
               <el-button slot="append" icon="el-icon-search"></el-button>
             </el-input>
             <el-table border class="_top" :data="engTable" :header-cell-style="{background:'#F6F5F4'}">
@@ -158,8 +158,8 @@ export default {
       activeIndex: "1",
       // 检索项-项目名称
       projectName: "",
-      // 物资信息索引项
-      engineerSearch: "",
+      // 检索项-物资名称
+      typeName: "",
       // 项目基础信息
       engineeringInfo: {
         contractMoney: 0,
@@ -217,6 +217,20 @@ export default {
         this.pageConfig.total = res.data.total;
       })
     },
+    // 获取工程的物资信息
+    getBatchData(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/materialBatchOperateRecords",
+        params: {
+          engineeringId: this.engineeringID,
+          typeName: this.typeName,
+          types: "1,3"
+        }
+      }).then(res=>{
+        console.log(res.data)
+      })
+    },
     // tab切换触发
     cutTabs(){
       switch (this.activeIndex) {
@@ -227,6 +241,7 @@ export default {
           this.getProjectListData()
           break;
         case "3":
+          this.getBatchData()
           break;
       }
     },

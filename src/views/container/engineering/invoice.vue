@@ -13,7 +13,7 @@
               <el-option
               :key="index"
               :label="item"
-              :value="index"
+              :value="index-1"
               v-for="(item, index) in typeList"></el-option>
             </el-select>
           </div>
@@ -82,7 +82,7 @@ export default {
       // 发票类型
       status: 0,
       // 类型列表
-      typeList: ["全部", "已确认", "未确认"],
+      typeList: ["全部", "未确认", "已确认" ],
       // 项目列表数据
       tableData: [],
       // 分页配置项
@@ -104,7 +104,7 @@ export default {
         url: "/api/v1/invoices",
         params: {
           invoiceNo: this.invoiceNo,
-          status: this.status,
+          status: this.status==-1?'':this.status,
           pageNum: this.pageConfig.pageNum,
           pageSize: this.pageConfig.pageSize
         }

@@ -5,48 +5,49 @@
         <div class="flexBox _bottom">
           <div class="flexBox">
             <span class="labelCls searchLabel">物资名称：</span>
-            <el-input clearable v-model="wzname" placeholder="请输入物资名称"></el-input>
+            <el-input clearable v-model="typeName" placeholder="请输入物资名称"></el-input>
           </div>
-          <div class="flexBox _left">
+          <div class="flexBox">
             <span class="labelCls searchLabel">供应商：</span>
-            <el-input clearable v-model="gys" placeholder="请输入供应商"></el-input>
+            <el-input clearable v-model="supplier" placeholder="请输入供应商"></el-input>
           </div>
-          <div class="flexBox _left">
+          <div class="flexBox">
             <span class="labelCls searchLabel">领用人：</span>
-            <el-input clearable v-model="lyr" placeholder="请输入领用人"></el-input>
+            <el-input clearable v-model="receiver" placeholder="请输入领用人"></el-input>
           </div>
         </div>
         <div class="flexBox" style="flex-wrap:wrap">
           <div class="flexBox _bottom">
-            <span class="labelCls searchLabel">工程：</span>
-            <el-input clearable v-model="gc" placeholder="请输入工程"></el-input>
+            <span class="labelCls searchLabel">工程名称：</span>
+            <el-input clearable v-model="engineeringName" placeholder="请输入工程名称"></el-input>
           </div>
-          <div class="flexBox _left _bottom">
+          <div class="flexBox _bottom">
             <span class="labelCls searchLabel">操作时间：</span>
             <el-date-picker
-              v-model="czTime"
+              v-model="uTime"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期">
             </el-date-picker>
           </div>
-          <div class="flexBox _left _right _bottom">
+          <div class="flexBox _right _bottom">
             <span class="labelCls searchLabel">发票号：</span>
-            <el-input clearable v-model="fpNum" placeholder="请输入发票号"></el-input>
+            <el-input clearable v-model="invoiceNo" placeholder="请输入发票号"></el-input>
           </div>
           <div class="flexBox _bottom">
-            <span class="labelCls searchLabel">类型：</span>
-            <el-radio-group v-model="wzType" size="medium">
-              <el-radio-button label="">全部</el-radio-button>
-              <el-radio-button label="1">出库</el-radio-button>
-              <el-radio-button label="2">入库</el-radio-button>
-              <el-radio-button label="3">退回</el-radio-button>
-            </el-radio-group>
+            <span class="labelCls searchLabel">物资类别：</span>
+            <el-select clearable v-model="types" placeholder="请选择">
+              <el-option
+              :key="index"
+              :label="item"
+              :value="index+1"
+              v-for="(item, index) in typeList"></el-option>
+            </el-select>
           </div>
           <div class="flexBox _left _bottom">
-            <el-button type="primary" size="medium">查询</el-button>
-            <el-button size="medium">重置</el-button>
+            <el-button @click="getMaterBatchRecords" type="primary" size="medium">查询</el-button>
+            <el-button @click="reset" size="medium">重置</el-button>
           </div>
         </div>
       </div>
@@ -56,31 +57,38 @@
           <span>导出</span>
         </el-button>
         <el-table border :data="tableData" class="_top" :header-cell-style="{background:'#F6F5F4'}">
-          <el-table-column label="物资名称">充电桩</el-table-column>
-          <el-table-column label="供应商">杭州呈安科技</el-table-column>
-          <el-table-column label="物资编号">CL001-100</el-table-column>
-          <el-table-column label="类型">入库</el-table-column>
-          <el-table-column label="数量">50</el-table-column>
-          <el-table-column label="单价">1,500</el-table-column>
-          <el-table-column label="合计金额">5900</el-table-column>
-          <el-table-column label="操作时间">2020-06-01</el-table-column>
-          <el-table-column label="发票号">09255539</el-table-column>
-          <el-table-column label="开票时间">2020-06-01</el-table-column>
-          <el-table-column label="结存金额">15,000</el-table-column>
-          <el-table-column label="结存数量">10</el-table-column>
-          <el-table-column label="存放地点">教工路仓库</el-table-column>
-          <el-table-column label="领用人">-</el-table-column>
-          <el-table-column label="场站">-</el-table-column>
-          <el-table-column label="使用状况">-</el-table-column>
-          <el-table-column label="备注">-</el-table-column>
+          <el-table-column label="物资名称" prop="typeName" width="200" fixed="left"></el-table-column>
+          <el-table-column label="供应商" prop="supplier"></el-table-column>
+          <el-table-column label="物资编号" prop="batchNo"></el-table-column>
+          <el-table-column label="类型" prop="">-</el-table-column>
+          <el-table-column label="数量" prop="count"></el-table-column>
+          <el-table-column label="单价" prop="price">
+            <template slot-scope="scope">{{scope.row.price|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="合计金额" prop="totalMoney">
+            <template slot-scope="scope">{{scope.row.totalMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="发票号" prop="">-</el-table-column>
+          <el-table-column label="创建时间" prop="createTime"></el-table-column>
+          <el-table-column label="操作时间" prop="updateTime"></el-table-column>
+          <el-table-column label="结存金额" prop="balanceMoney">
+            <template slot-scope="scope">{{scope.row.balanceMoney|CYB}}</template>
+          </el-table-column>
+          <el-table-column label="结存数量" prop="balanceCount"></el-table-column>
+          <el-table-column label="存放地点" prop="">-</el-table-column>
+          <el-table-column label="领用人" prop="receiver"></el-table-column>
+          <el-table-column label="场站" prop="">-</el-table-column>
+          <el-table-column label="使用状况" prop="">-</el-table-column>
+          <el-table-column label="备注" prop="remark" width="200"></el-table-column>
         </el-table>
-        <Page :pageConfig="pageConfig" />
+        <Page :pageConfig="pageConfig" @cutPage="cutPage" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import toolkit from "@/toolkit/index";
 export default {
   name: "inoutWarehouse",
   components: {
@@ -89,27 +97,70 @@ export default {
   data () {
     return {
       // 检索项-物资名称
-      wzname: "",
+      typeName: "",
       // 检索项-供应商：
-      gys: "",
+      supplier: "",
       // 检索项-领用人
-      lyr: "",
-      // 检索项-工程
-      gc: "",
+      receiver: "",
+      // 检索项-工程名称
+      engineeringName: "",
       // 检索项-操作时间
-      czTime: [],
+      uTime: [],
       // 检索项-发票号
-      fpNum: "",
-      // 物资类型
-      wzType: "",
+      invoiceNo: "",
+      // 检索项-物资类别
+      types: "",
+      // 物资类别列表
+      typeList: ["入库", "出库", "退回"],
       // 项目列表数据
-      tableData: [1,2,3,4,5],
+      tableData: [],
       // 分页配置项
       pageConfig: {
         pageNum: 1,
         pageSize: 10,
         total: 0
       }
+    }
+  },
+  mounted(){
+    this.getMaterBatchRecords()
+  },
+  methods: {
+    // 获取物资进出记录
+    getMaterBatchRecords(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/materialBatchOperateRecords",
+        params: {
+          typeName: this.typeName,
+          supplier: this.supplier,
+          receiver: this.receiver,
+          engineeringName: this.engineeringName,
+          operateTimeStart: this.uTime[0]?toolkit.transitionDate(this.uTime[0], "YYYY-MM-DD"):'',
+          operateTimeEnd: this.uTime[1]?toolkit.transitionDate(this.uTime[1], "YYYY-MM-DD"):'',
+          invoiceNo: this.invoiceNo,
+          types: this.types
+        }
+      }).then(res=>{
+        this.tableData = res.data.list;
+        this.pageConfig.total = res.data.total;
+      })
+    },
+    // 重置检索项
+    reset(){
+      this.typeName = "";
+      this.supplier = "";
+      this.receiver = "";
+      this.engineeringName = "";
+      this.uTime = [];
+      this.invoiceNo = "";
+      this.types = "";
+      this.getMaterBatchRecords()
+    },
+    // 切换页码
+    cutPage(e){
+      this.pageConfig.pageNum = e;
+      this.getMaterBatchRecords()
     }
   }
 }
@@ -121,7 +172,7 @@ export default {
   background: #ffffff;
 }
 .searchLabel{
-  min-width: 80px;
+  min-width: 90px;
   text-align: right;
 }
 .table_box{
