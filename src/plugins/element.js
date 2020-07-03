@@ -28,6 +28,7 @@ import {
   Option,
   Button,
   Divider,
+  Loading,
   Checkbox,
   FormItem,
   DatePicker,
@@ -70,7 +71,9 @@ Vue.use(Container)
   .use(Checkbox)
   .use(Breadcrumb)
   .use(TableColumn)
-  .use(BreadcrumbItem);
+  .use(BreadcrumbItem)
+  .use(Loading.directive);
 
+Vue.prototype.$loading = Loading.service;
 Vue.prototype.$confirm = MessageBox.confirm;
 Vue.prototype.$message = Message;

@@ -158,6 +158,8 @@ export default {
           engineeringName: this.engineeringName,
           contractNo: this.contractNo,
           contractParty: this.contractParty,
+          signTimeStart: this.contractSignTime[0]?toolkit.transitionDate(this.contractSignTime[0], "YYYY-MM-DD HH:MM:SS"):'',
+          signTimeEnd: this.contractSignTime[1]?toolkit.transitionDate(this.contractSignTime[1], "YYYY-MM-DD HH:MM:SS"):'',
           pageNum: this.pageConfig.pageNum,
           pageSize: this.pageConfig.pageSize
         }

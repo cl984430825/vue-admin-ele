@@ -136,10 +136,12 @@ export default {
           supplier: this.supplier,
           receiver: this.receiver,
           engineeringName: this.engineeringName,
-          operateTimeStart: this.uTime[0]?toolkit.transitionDate(this.uTime[0], "YYYY-MM-DD"):'',
-          operateTimeEnd: this.uTime[1]?toolkit.transitionDate(this.uTime[1], "YYYY-MM-DD"):'',
+          operateTimeStart: this.uTime[0]?toolkit.transitionDate(this.uTime[0], "YYYY-MM-DD HH:MM:SS"):'',
+          operateTimeEnd: this.uTime[1]?toolkit.transitionDate(this.uTime[1], "YYYY-MM-DD HH:MM:SS"):'',
           invoiceNo: this.invoiceNo,
-          types: this.types
+          types: this.types,
+          pageNum: this.pageConfig.pageNum,
+          pageSize: this.pageConfig.pageSize
         }
       }).then(res=>{
         this.tableData = res.data.list;

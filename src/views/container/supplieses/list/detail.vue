@@ -76,14 +76,12 @@
               </div>
             </div>
             <el-table border class="_top" :data="batchTable" :header-cell-style="{background:'#F6F5F4'}">
-              <el-table-column label="批次号" prop="no" width="200"></el-table-column>
-              <el-table-column label="编号" prop="startNo" width="150">
-                <template slot-scope="scope">{{scope.row.startNo}}-{{scope.row.endNo}}</template>
-              </el-table-column>
-              <el-table-column label="结存数量" prop="balanceCount" width="100"></el-table-column>
+              <el-table-column label="批次号" prop="no" width="150"></el-table-column>
+              <el-table-column label="物资编号" prop="materialNo" width="150"></el-table-column>
               <el-table-column label="单价" prop="price" width="100">
                 <template slot-scope="scope">{{scope.row.price|CYB}}</template>
               </el-table-column>
+              <el-table-column label="结存数量" prop="balanceCount" width="100"></el-table-column>
               <el-table-column label="结存金额" prop="balanceMoney" width="150">
                 <template slot-scope="scope">{{scope.row.balanceMoney|CYB}}</template>
               </el-table-column>
@@ -94,13 +92,13 @@
               <el-table-column label="存放地点" prop="storageLocation" width="100"></el-table-column>
               <el-table-column label="操作" fixed="right" width="160">
                 <template slot-scope="scope">
-                  <span @click="chukuOne(scope)" class="blueText">出库</span>
+                  <span @click="chukuOne(scope)" v-if="scope.row.balanceCount>1" class="blueText">出库</span>
                   <span class="blueText _left">编辑</span>
-                  <span class="blueText _left">删除</span>
+                  <span @click="delBatch(scope)" v-if="scope.row.count==scope.row.balanceCount" class="blueText _left">删除</span>
                 </template>
               </el-table-column>
             </el-table>
-            <Page :pageConfig="batchPage" />
+            <Page :pageConfig="batchPage" @cutPage="cutPage($event,'batchPage','getMaterialBatchList')" />
           </div>
         </el-tab-pane>
         <el-tab-pane label="出入库明细" name="3">
@@ -109,39 +107,39 @@
               <div class="flexBox">
                 <div class="flexBox">
                   <span class="labelCls searchLabel">类型：</span>
-                  <el-radio-group v-model="engType" size="medium">
+                  <el-radio-group v-model="types" size="medium" @change="getOperateRecordList">
                     <el-radio-button label="">全部</el-radio-button>
-                    <el-radio-button label="1">出库</el-radio-button>
-                    <el-radio-button label="2">入库</el-radio-button>
+                    <el-radio-button label="1">入库</el-radio-button>
+                    <el-radio-button label="2">出库</el-radio-button>
                     <el-radio-button label="3">退回</el-radio-button>
                   </el-radio-group>
                 </div>
                 <el-input 
                   clearable
                   class="_left"
-                  v-model="engineerSearch"
+                  v-model="typeName"
                   style="width:300px" 
-                  placeholder="批次/编号/发票号">
-                  <el-button slot="append" icon="el-icon-search"></el-button>
+                  placeholder="物资名称">
+                  <el-button @click="getOperateRecordList" slot="append" icon="el-icon-search"></el-button>
                 </el-input>
               </div>
               <el-button size="medium">导出</el-button>
             </div>
             <el-table border class="_top" :data="engTable" :header-cell-style="{background:'#F6F5F4'}">
-              <el-table-column label="物资批次">1</el-table-column>
-              <el-table-column label="物资编号">2</el-table-column>
-              <el-table-column label="数量">3</el-table-column>
-              <el-table-column label="单价">4</el-table-column>
-              <el-table-column label="合计金额">5</el-table-column>
-              <el-table-column label="操作时间">1</el-table-column>
-              <el-table-column label="发票号">2</el-table-column>
-              <el-table-column label="开票时间">123</el-table-column>
-              <el-table-column label="存放地点">123</el-table-column>
-              <el-table-column label="结存金额">123</el-table-column>
-              <el-table-column label="结存数量">123</el-table-column>
-              <el-table-column label="备注" width="120">-</el-table-column>
+              <el-table-column label="物资批次" prop="batchNo"></el-table-column>
+              <el-table-column label="物资编号" prop="materialNo"></el-table-column>
+              <el-table-column label="数量" prop="count"></el-table-column>
+              <el-table-column label="单价" prop="price"></el-table-column>
+              <el-table-column label="合计金额" prop="totalMoney"></el-table-column>
+              <el-table-column label="操作时间" prop="updateTime"></el-table-column>
+              <el-table-column label="发票号" prop="">-</el-table-column>
+              <el-table-column label="开票时间" prop="">-</el-table-column>
+              <el-table-column label="领用人" prop="receiver"></el-table-column>
+              <el-table-column label="结存金额" prop="balanceMoney"></el-table-column>
+              <el-table-column label="结存数量" prop="balanceCount"></el-table-column>
+              <el-table-column label="备注" prop="remark" width="120"></el-table-column>
             </el-table>
-            <Page :pageConfig="endPageConfig" />
+            <Page :pageConfig="engPageConfig" @cutPage="cutPage($event,'engPageConfig','getOperateRecordList')" />
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -195,10 +193,62 @@
           <el-input v-model="rukuForm.remark" clearable placeholder="请输入备注"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button @click="rukuConfirm" type="primary" size="medium">确 定</el-button>
+          <el-button @click="rukuConfirm(1)" type="primary" size="medium">确 定</el-button>
           <el-button size="medium">取 消</el-button>
         </el-form-item>
       </el-form>
+      <el-dialog
+        width="40%"
+        title="核对并确认以下信息"
+        :visible.sync="rukuDialogT"
+        append-to-body>
+        <div style="padding:0 20px">
+          <div>
+            <span>物资：</span>
+            <span>{{ruleForm.name}}</span>
+          </div>
+          <div class="_top">
+            <span>批次：</span>
+            <span>{{batchNo}}</span>
+          </div>
+          <div class="_top">
+            <span>数量：</span>
+            <span>{{rukuForm.count}}</span>
+          </div>
+          <div class="_top">
+            <span>总金额：</span>
+            <span>￥{{rukuForm.totalMoney|FIXED}}</span>
+          </div>
+          <div class="_top">
+            <span>单价：</span>
+            <span>￥{{(rukuForm.totalMoney / rukuForm.count)|FIXED}}</span>
+          </div>
+          <div class="_top">
+            <span>编号：</span>
+            <span>{{batchNo}}-{{rukuForm.startNo}}-{{rukuForm.count}}</span>
+          </div>
+          <div class="_top">
+            <span>发票号：</span>
+            <span>{{rukuForm.invoiceNo}}</span>
+          </div>
+          <div class="_top">
+            <span>开票时间：</span>
+            <span>{{rukuForm.invoiceSignTime|TRANSDATE}}</span>
+          </div>
+          <div class="_top">
+            <span>存放地点：</span>
+            <span>{{rukuForm.storageLocation}}</span>
+          </div>
+          <div class="_top">
+            <span>备注说明：</span>
+            <span>{{rukuForm.remark}}</span>
+          </div>
+          <div class="_top">
+            <el-button @click="rukuConfirm(2)" type="primary" size="medium">确 定</el-button>
+            <el-button @click="rukuDialogT=false" size="medium">取 消</el-button>
+          </div>
+        </div>
+      </el-dialog>
     </el-dialog>
     <el-dialog
       width="40%"
@@ -209,17 +259,17 @@
           <el-input v-model="ruleForm.name" disabled></el-input>
         </el-form-item>
         <el-form-item label="批次：" prop="batch">
-          <el-select v-model="chukuForm.batch" style="width:100%" filterable placeholder="请选择批次">
+          <el-select v-model="chukuForm.batch" @change="pitchBatch" style="width:100%" filterable placeholder="请选择批次">
             <el-option
               v-for="(item,index) in batchList"
               :key="index"
               :label="item.batchNo"
-              :value="item">
+              :value="item.batchId">
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="场站：" prop="engineeringId">
-          <el-select v-model="chukuForm.engineeringId" style="width:100%" filterable placeholder="请选择场站">
+          <el-select v-model="chukuForm.engineeringId" @change="pitchPark" style="width:100%" filterable placeholder="请选择场站">
             <el-option
               v-for="(item,index) in parkList"
               :key="index"
@@ -229,12 +279,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="数量：" prop="count">
-          <el-input-number v-model="chukuForm.count" :min="1" :max="chukuForm.batch.balanceCount"></el-input-number>
-          <span class="labelCls _left" v-if="chukuForm.batch.balanceCount">当前结存数量：{{chukuForm.batch.balanceCount}}</span>
+          <el-input-number v-model="chukuForm.count" :min="1" :max="batchInfo.balanceCount"></el-input-number>
+          <span class="labelCls _left" v-if="batchInfo.balanceCount">当前结存数量：{{batchInfo.balanceCount}}</span>
         </el-form-item>
         <el-form-item label="总金额：" prop="totalMoney">
-          <el-input-number v-model="chukuForm.totalMoney" controls-position="right" :min="1" :max="chukuForm.batch.balanceMoney/100" :precision="2"></el-input-number>
-          <span class="labelCls _left" v-if="chukuForm.batch.balanceMoney">当前结存金额：{{chukuForm.batch.balanceMoney|CYB}}</span>
+          <el-input-number v-model="chukuForm.totalMoney" controls-position="right" :min="1" :max="batchInfo.balanceMoney/100" :precision="2"></el-input-number>
+          <span class="labelCls _left" v-if="batchInfo.balanceMoney">当前结存金额：{{batchInfo.balanceMoney|CYB}}</span>
         </el-form-item>
         <el-form-item label="领用人：" prop="receiver">
           <el-input v-model="chukuForm.receiver" placeholder="请输入领用人"></el-input>
@@ -246,10 +296,54 @@
           <el-input v-model="chukuForm.remark" clearable placeholder="请输入备注"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button @click="chukuConfirm" type="primary" size="medium">确 定</el-button>
+          <el-button @click="chukuConfirm(1)" type="primary" size="medium">确 定</el-button>
           <el-button size="medium">取 消</el-button>
         </el-form-item>
       </el-form>
+      <el-dialog
+        width="40%"
+        title="核对并确认以下信息"
+        :visible.sync="chukuDialogT"
+        append-to-body>
+        <div style="padding:0 20px">
+          <div>
+            <span>物资：</span>
+            <span>{{ruleForm.name}}</span>
+          </div>
+          <div class="_top">
+            <span>批次：</span>
+            <span>{{batchInfo.batchNo}}</span>
+          </div>
+          <div class="_top">
+            <span>场站：</span>
+            <span>{{chukuForm.stationName}}</span>
+          </div>
+          <div class="_top">
+            <span>数量：</span>
+            <span>{{chukuForm.count}}</span>
+          </div>
+          <div class="_top">
+            <span>总金额：</span>
+            <span>￥{{chukuForm.totalMoney}}</span>
+          </div>
+          <div class="_top">
+            <span>领用人：</span>
+            <span>{{chukuForm.receiver}}</span>
+          </div>
+          <div class="_top">
+            <span>使用状况：</span>
+            <span>{{chukuForm.useDetail}}</span>
+          </div>
+          <div class="_top">
+            <span>备注说明：</span>
+            <span>{{chukuForm.remark}}</span>
+          </div>
+          <div class="_top">
+            <el-button @click="chukuConfirm(2)" type="primary" size="medium">确 定</el-button>
+            <el-button @click="chukuDialogT=false" size="medium">取 消</el-button>
+          </div>
+        </div>
+      </el-dialog>
     </el-dialog>
     <el-dialog
       width="40%"
@@ -260,31 +354,63 @@
           <el-input v-model="ruleForm.name" disabled></el-input>
         </el-form-item>
         <el-form-item label="批次：" prop="batch">
-          <el-select v-model="tuihuiForm.batch" style="width:100%" filterable placeholder="请选择批次">
+          <el-select v-model="tuihuiForm.batch" @change="pitchBatch" style="width:100%" filterable placeholder="请选择批次">
             <el-option
               v-for="(item,index) in batchList"
               :key="index"
               :label="item.batchNo"
-              :value="item">
+              :value="item.batchId">
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="数量：" prop="count">
-          <el-input-number v-model="tuihuiForm.count" :min="1" :max="tuihuiForm.batch.balanceCount"></el-input-number>
-          <span class="labelCls _left" v-if="tuihuiForm.batch.balanceCount">当前结存数量：{{tuihuiForm.batch.balanceCount}}</span>
+          <el-input-number v-model="tuihuiForm.count" :min="1" :max="batchInfo.balanceCount"></el-input-number>
+          <span class="labelCls _left" v-if="batchInfo.balanceCount||batchInfo.balanceCount==0">当前结存数量：{{batchInfo.balanceCount}}</span>
         </el-form-item>
         <el-form-item label="总金额：" prop="totalMoney">
-          <el-input-number v-model="tuihuiForm.totalMoney" controls-position="right" :min="1" :max="tuihuiForm.batch.balanceMoney/100" :precision="2"></el-input-number>
-          <span class="labelCls _left" v-if="tuihuiForm.batch.balanceMoney">当前结存金额：{{tuihuiForm.batch.balanceMoney|CYB}}</span>
+          <el-input-number v-model="tuihuiForm.totalMoney" controls-position="right" :min="1" :max="batchInfo.balanceMoney/100" :precision="2"></el-input-number>
+          <span class="labelCls _left" v-if="batchInfo.balanceMoney||batchInfo.balanceMoney==0">当前结存金额：{{batchInfo.balanceMoney|CYB}}</span>
         </el-form-item>
         <el-form-item label="备注说明：" prop="remark">
           <el-input v-model="tuihuiForm.remark" clearable placeholder="请输入备注"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button @click="tuihuiConfirm" type="primary" size="medium">确 定</el-button>
+          <el-button @click="tuihuiConfirm(1)" type="primary" size="medium">确 定</el-button>
           <el-button size="medium">取 消</el-button>
         </el-form-item>
       </el-form>
+      <el-dialog
+        width="40%"
+        title="核对并确认以下信息"
+        :visible.sync="tuihuiDialogT"
+        append-to-body>
+        <div style="padding:0 20px">
+          <div>
+            <span>物资：</span>
+            <span>{{ruleForm.name}}</span>
+          </div>
+          <div class="_top">
+            <span>批次：</span>
+            <span>{{batchInfo.batchNo}}</span>
+          </div>
+          <div class="_top">
+            <span>数量：</span>
+            <span>{{tuihuiForm.count}}</span>
+          </div>
+          <div class="_top">
+            <span>总金额：</span>
+            <span>￥{{tuihuiForm.totalMoney}}</span>
+          </div>
+          <div class="_top">
+            <span>备注说明：</span>
+            <span>{{tuihuiForm.remark}}</span>
+          </div>
+          <div class="_top">
+            <el-button @click="tuihuiConfirm(2)" type="primary" size="medium">确 定</el-button>
+            <el-button @click="tuihuiDialogT=false" size="medium">取 消</el-button>
+          </div>
+        </div>
+      </el-dialog>
     </el-dialog>
   </div>
 </template>
@@ -322,10 +448,10 @@ export default {
       typeList: ["工程物资", "在建工程", "低值易耗", "办公用品", "固定资产", "无形资产", "贸易材料", "研发材料", "库存商品", "劳保用品"],
       // 检索项-批次列表批次号
       no: "",
-      // 出入库明细索引项
-      engineerSearch: "",
-      // 出入库检索类型
-      engType: "",
+      // 检索项-出入库明细物资名称
+      typeName: "",
+      // 检索项-出入库明细类别
+      types: "",
       // 批次信息table
       batchTable: [],
       // 出入库明细table
@@ -337,17 +463,20 @@ export default {
         total: 0
       },
       // 出入库明细分页配置项
-      endPageConfig: {
+      engPageConfig: {
         pageNum: 1,
         pageSize: 10,
         total: 0
       },
       // 入库dialog
       rukuDialog: false,
+      rukuDialogT: false,
       // 出库dialog
       chukuDialog: false,
+      chukuDialogT: false,
       // 退回dialog
       tuihuiDialog: false,
+      tuihuiDialogT: false,
       // 新增入库表单
       rukuForm: {
         name: true,
@@ -409,7 +538,9 @@ export default {
       // 所属物资类别id
       supplieseId: "",
       // 批次号
-      batchNo: ""
+      batchNo: "",
+      // 批次号选中后的批次信息
+      batchInfo: {}
     }
   },
   mounted(){
@@ -418,91 +549,132 @@ export default {
     this.getNewBatchNo()
   },
   methods: {
+    // 选中批次
+    pitchBatch(e){
+      this.batchInfo = this.batchList.filter(m=>{
+        return m.batchId == e;
+      })[0];
+    },
+    // 选中场站
+    pitchPark(e){
+      this.chukuForm.stationName = this.parkList.filter(m=>{
+        return m.id == e;
+      })[0].stationName;
+    },
     // 新增退回确定
-    tuihuiConfirm(){
-      this.$refs['tuihuiForm'].validate((valid) => {
-        if (valid) {
-          this.$axios({
-            method: "PUT",
-            url: "/api/v1/materialBatchs/back",
-            data: {
-              materialTypeId: this.supplieseId,
-              id: this.tuihuiForm.batch.batchId,
-              count: this.tuihuiForm.count,
-              totalMoney: this.tuihuiForm.totalMoney,
-              remark: this.tuihuiForm.remark
-            }
-          }).then(res=>{
-            this.getMaterialBatchList();
-            this.$message.success("退回成功");
-            this.tuihuiDialog = false;
-          })
-        }
-      })
+    tuihuiConfirm(n){
+      if(n==1){
+        this.$refs['tuihuiForm'].validate((valid) => {
+          if (valid) {
+            this.tuihuiDialogT = true;
+          }
+        })
+      }else if(n==2){
+        this.$axios({
+          method: "PUT",
+          url: "/api/v1/materialBatchs/back",
+          data: {
+            materialTypeId: this.supplieseId,
+            id: this.tuihuiForm.batch,
+            count: this.tuihuiForm.count,
+            totalMoney: this.tuihuiForm.totalMoney,
+            remark: this.tuihuiForm.remark
+          }
+        }).then(res=>{
+          this.getMaterialBatchList();
+          this.$message.success("退回成功");
+          this.tuihuiDialog = false;
+          this.tuihuiDialogT = false;
+        })
+      }
+    },
+    // 删除批次
+    delBatch(scope){
+      this.$confirm('删除后无法恢复，确认要删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$axios({
+          method: "DELETE",
+          url: "/api/v1/materialBatchs/" + scope.row.id
+        }).then(res=>{
+          this.getMaterialBatchList()
+          this.$message.success("删除成功");
+        })
+      }).catch(()=>{})
     },
     // 对指定批次进行出库
     chukuOne(scope){
       this.openChuku(()=>{
-        this.chukuForm.batch = {
-          balanceCount: scope.row.balanceCount,
-          balanceMoney: scope.row.balanceMoney / 100,
-          batchId: scope.row.id,
-          batchNo: scope.row.no
-        }
+        this.chukuForm.batch = scope.row.id;
+        this.batchInfo = this.batchList.filter(m=>{
+          return m.batchId == scope.row.id;
+        })[0];
       })
     },
     // 新增出库确定
-    chukuConfirm(){
-      this.$refs['chukuForm'].validate((valid) => {
-        if (valid) {
-          this.$axios({
-            method: "PUT",
-            url: "/api/v1/materialBatchs/out",
-            data: {
-              materialTypeId: this.supplieseId,
-              id: this.chukuForm.batch.batchId,
-              engineeringId: this.chukuForm.engineeringId,
-              count: this.chukuForm.count,
-              totalMoney: this.chukuForm.totalMoney * 100,
-              receiver: this.chukuForm.receiver,
-              useDetail: this.chukuForm.useDetail,
-              remark: this.chukuForm.remark
-            }
-          }).then(res=>{
-            this.getMaterialBatchList();
-            this.$message.success("出库成功");
-            this.chukuDialog = false;
-          })
-        }
-      })
+    chukuConfirm(n){
+      if(n==1){
+        this.$refs['chukuForm'].validate((valid) => {
+          if (valid) {
+            this.chukuDialogT = true;
+          }
+        })
+      }else if(n==2){
+        this.$axios({
+          method: "PUT",
+          url: "/api/v1/materialBatchs/out",
+          data: {
+            materialTypeId: this.supplieseId,
+            id: this.chukuForm.batch,
+            engineeringId: this.chukuForm.engineeringId,
+            count: this.chukuForm.count,
+            totalMoney: this.chukuForm.totalMoney * 100,
+            receiver: this.chukuForm.receiver,
+            useDetail: this.chukuForm.useDetail,
+            remark: this.chukuForm.remark
+          }
+        }).then(res=>{
+          this.getMaterialBatchList();
+          this.$message.success("出库成功");
+          this.chukuDialog = false;
+          this.chukuDialogT = false;
+        })
+      }
     },
     // 新增入库确定
-    rukuConfirm(){
-      this.$refs['rukuForm'].validate((valid) => {
-        if (valid) {
-          this.$axios({
-            method: "POST",
-            url: "/api/v1/materialBatchs",
-            data: {
-              materialTypeId: this.supplieseId,
-              no: this.batchNo,
-              count: this.rukuForm.count,
-              totalMoney: this.rukuForm.totalMoney * 100,
-              price: (this.rukuForm.totalMoney / this.rukuForm.count) * 100,
-              startNo: 1,
-              endNo: this.rukuForm.count,
-              invoiceNo: this.rukuForm.invoiceNo,
-              invoiceSignTime: toolkit.transitionDate(this.rukuForm.invoiceSignTime,"YYYY-MM-DD HH:MM:SS"),
-              storageLocation: this.rukuForm.storageLocation,
-              remark: this.rukuForm.remark
-            }
-          }).then(res=>{
-            this.getMaterialBatchList();
-            this.$message.success("入库成功");
-            this.rukuDialog = false;
-          })
-        }
-      })
+    rukuConfirm(n){
+      if(n==1){
+        this.$refs['rukuForm'].validate((valid) => {
+          if (valid) {
+            this.rukuDialogT = true;
+          }
+        })
+      }else if(n==2){
+        this.$axios({
+          method: "POST",
+          url: "/api/v1/materialBatchs",
+          data: {
+            materialTypeId: this.supplieseId,
+            no: this.batchNo,
+            count: this.rukuForm.count,
+            totalMoney: this.rukuForm.totalMoney * 100,
+            price: (this.rukuForm.totalMoney / this.rukuForm.count) * 100,
+            startNo: 1,
+            endNo: this.rukuForm.count,
+            invoiceNo: this.rukuForm.invoiceNo,
+            invoiceSignTime: toolkit.transitionDate(this.rukuForm.invoiceSignTime,"YYYY-MM-DD HH:MM:SS"),
+            storageLocation: this.rukuForm.storageLocation,
+            remark: this.rukuForm.remark
+          }
+        }).then(res=>{
+          this.getMaterialBatchList();
+          this.$message.success("入库成功");
+          this.rukuDialog = false;
+          this.rukuDialogT = false;
+        })
+      }
     },
     // 获取批次下拉列表
     getBatchList(type){
@@ -570,6 +742,22 @@ export default {
         }
       })
     },
+    // 获取出入库明细列表
+    getOperateRecordList(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/materialBatchOperateRecords",
+        params: {
+          typeName: this.typeName,
+          types: this.types,
+          pageNum: this.engPageConfig.pageNum,
+          pageSize: this.engPageConfig.pageSize
+        }
+      }).then(res=>{
+        this.engTable = res.data.list;
+        this.engPageConfig.total = res.data.total;
+      })
+    },
     // 获取物资批次列表
     getMaterialBatchList(){
       this.$axios({
@@ -577,6 +765,7 @@ export default {
         url: "/api/v1/materialBatchs",
         params: {
           no: this.no,
+          materialTypeId: this.supplieseId,
           pageNum: this.batchPage.pageNum,
           pageSize: this.batchPage.pageSize
         }
@@ -613,8 +802,14 @@ export default {
           this.getMaterialBatchList()
           break;
         case "3":
+          this.getOperateRecordList()
           break;
       }
+    },
+    // 切换页码
+    cutPage(e, val, fn){
+      this[val].pageNum = e;
+      this[fn]();
     },
     // 返回列表
     toBack(){

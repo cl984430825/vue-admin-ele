@@ -1,11 +1,5 @@
 <template>
   <div id="app">
-    <!-- 请求进度条 -->
-    <div
-      class="onUpload"
-      v-if="loadNum < 100"
-      :style="'width:' + loadNum + 'vw'"
-    ></div>
     <router-view></router-view>
   </div>
 </template>
@@ -13,21 +7,13 @@
 <script>
 export default {
   name: "app",
-  data() {
-    return {
-      // 请求进度条数值
-      loadNum: 0
-    };
-  },
   created() {
     // 请求拦截器
     this.$axios.interceptors.request.use(
       config => {
+        this.$openLoad(true)
         // 请求头携带token
         config.headers['token'] = localStorage.getItem("token");
-        this.setLoaded(config).then(() => {
-          return config;
-        });
         return config;
       },
       error => {
@@ -37,9 +23,11 @@ export default {
     // 返回拦截器
     this.$axios.interceptors.response.use(
       response => {
+        this.$openLoad(false)
         return response;
       },
       error => {
+        this.$openLoad(false)
         if(error.response.status == 401){
           this.$message.error("登录超时，请重新登录。")
           this.$router.push("/login");
@@ -51,21 +39,6 @@ export default {
         return Promise.reject(error);
       }
     );
-  },
-  methods: {
-    setLoaded(c) {
-      var that = this;
-      return new Promise(resolve => {
-        this.loadNum = 0;
-        // 监听请求的进度事件
-        c.onDownloadProgress = function(event) {
-          that.loadNum = Math.round((event.loaded / event.total) * 100);
-          if (that.loadNum >= 100) {
-            resolve();
-          }
-        };
-      });
-    }
   }
 };
 </script>

@@ -122,19 +122,26 @@
               v-model="typeName"
               style="width:300px" 
               placeholder="物资名称">
-              <el-button slot="append" icon="el-icon-search"></el-button>
+              <el-button @click="getBatchData" slot="append" icon="el-icon-search"></el-button>
             </el-input>
             <el-table border class="_top" :data="engTable" :header-cell-style="{background:'#F6F5F4'}">
-              <el-table-column label="供应商">1</el-table-column>
-              <el-table-column label="物资名称">2</el-table-column>
-              <el-table-column label="物资编号">3</el-table-column>
-              <el-table-column label="领用人">4</el-table-column>
-              <el-table-column label="使用状况">5</el-table-column>
-              <el-table-column label="发票编号">1</el-table-column>
-              <el-table-column label="入库时间">2</el-table-column>
-              <el-table-column label="领用时间">123</el-table-column>
-              <el-table-column label="转入数量">123</el-table-column>
-              <el-table-column label="转入未税（元）" width="120">123</el-table-column>
+              <el-table-column label="供应商" prop="supplier"></el-table-column>
+              <el-table-column label="物资名称" prop="typeName"></el-table-column>
+              <el-table-column label="物资编号" prop="startNo">
+                <template slot-scope="scope">{{scope.row.startNo}}-{{scope.row.endNo}}</template>
+              </el-table-column>
+              <el-table-column label="领用人" prop="receiver"></el-table-column>
+              <el-table-column label="状态" prop="type">
+                <template slot-scope="scope">{{scope.row.type==2?'出库':'退回'}}</template>
+              </el-table-column>
+              <el-table-column label="使用状况" prop="useDetail"></el-table-column>
+              <el-table-column label="发票编号" prop="">-</el-table-column>
+              <el-table-column label="操作时间" prop="updateTime"></el-table-column>
+              <el-table-column label="领用时间" prop="">-</el-table-column>
+              <el-table-column label="物资数量" prop="count"></el-table-column>
+              <el-table-column label="物资总价" prop="totalMoney">
+                <template slot-scope="scope">{{scope.row.totalMoney|CYB}}</template>
+              </el-table-column>
             </el-table>
             <Page :pageConfig="endPageConfig" />
           </div>
@@ -174,7 +181,7 @@ export default {
       // 项目信息table
       projectTable: [],
       // 物资信息table
-      engTable: [1,2,3],
+      engTable: [],
       // 项目信息分页配置项
       pageConfig: {
         pageNum: 1,
@@ -225,10 +232,11 @@ export default {
         params: {
           engineeringId: this.engineeringID,
           typeName: this.typeName,
-          types: "1,3"
+          types: "2,3"
         }
       }).then(res=>{
-        console.log(res.data)
+        this.engTable = res.data.list;
+        this.endPageConfig.total = res.data.total;
       })
     },
     // tab切换触发

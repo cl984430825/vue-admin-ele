@@ -84,8 +84,8 @@ export default {
         url: "/api/v1/materialBalanceRecords",
         params: {
           supplier: this.supplier,
-          balanceTimeStart: this.dateVal[0]?toolkit.transitionDate(this.dateVal[0], "YYYY-MM-DD"):'',
-          balanceTimeEnd: this.dateVal[1]?toolkit.transitionDate(this.dateVal[1], "YYYY-MM-DD"):'',
+          balanceTimeStart: this.dateVal[0]?toolkit.transitionDate(this.dateVal[0], "YYYY-MM-DD HH:MM:SS"):'',
+          balanceTimeEnd: this.dateVal[1]?toolkit.transitionDate(this.dateVal[1], "YYYY-MM-DD HH:MM:SS"):'',
           pageNum: this.pageConfig.pageNum,
           pageSize: this.pageConfig.pageSize
         }

@@ -3,12 +3,14 @@ import App from "./App.vue";
 import axios from "axios";
 import store from "./store";
 import router from "./router";
+import toolkit from "./toolkit/index";
 import filters from "./toolkit/filter";
 import "./plugins/element.js";
 
 Vue.config.productionTip = false;
 Vue.prototype.$bus = new Vue();
 Vue.prototype.$axios = axios;
+Vue.prototype.$openLoad = toolkit.openLoad;
 Vue.config.productionTip = false;
 // 设置全局的代理请求头
 axios.defaults.baseURL = "/proxy";

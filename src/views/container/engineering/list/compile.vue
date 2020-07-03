@@ -123,7 +123,7 @@
                 </template>
               </el-table-column>
             </el-table>
-            <Page :pageConfig="pageConfig" />
+            <Page :pageConfig="pageConfig" @cutPage="cutPage($event,'pageConfig','getProjectListData')" />
           </div>
         </el-tab-pane>
         <el-tab-pane label="物资信息" name="3">
@@ -136,18 +136,25 @@
               <el-button slot="append" icon="el-icon-search"></el-button>
             </el-input>
             <el-table border class="_top" :data="engTable" :header-cell-style="{background:'#F6F5F4'}">
-              <el-table-column label="供应商">1</el-table-column>
-              <el-table-column label="物资名称">2</el-table-column>
-              <el-table-column label="物资编号">3</el-table-column>
-              <el-table-column label="领用人">4</el-table-column>
-              <el-table-column label="使用状况">5</el-table-column>
-              <el-table-column label="发票编号">1</el-table-column>
-              <el-table-column label="入库时间">2</el-table-column>
-              <el-table-column label="领用时间">123</el-table-column>
-              <el-table-column label="转入数量">123</el-table-column>
-              <el-table-column label="转入未税（元）" width="120">123</el-table-column>
+              <el-table-column label="供应商" prop="supplier"></el-table-column>
+              <el-table-column label="物资名称" prop="typeName"></el-table-column>
+              <el-table-column label="物资编号" prop="startNo">
+                <template slot-scope="scope">{{scope.row.startNo}}-{{scope.row.endNo}}</template>
+              </el-table-column>
+              <el-table-column label="领用人" prop="receiver"></el-table-column>
+              <el-table-column label="状态" prop="type">
+                <template slot-scope="scope">{{scope.row.type==2?'出库':'退回'}}</template>
+              </el-table-column>
+              <el-table-column label="使用状况" prop="useDetail"></el-table-column>
+              <el-table-column label="发票编号" prop="">-</el-table-column>
+              <el-table-column label="操作时间" prop="updateTime"></el-table-column>
+              <el-table-column label="领用时间" prop="">-</el-table-column>
+              <el-table-column label="物资数量" prop="count"></el-table-column>
+              <el-table-column label="物资总价" prop="totalMoney">
+                <template slot-scope="scope">{{scope.row.totalMoney|CYB}}</template>
+              </el-table-column>
             </el-table>
-            <Page :pageConfig="endPageConfig" />
+            <Page :pageConfig="endPageConfig" @cutPage="cutPage($event,'endPageConfig','getBatchData')" />
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -279,7 +286,7 @@ export default {
       // 项目信息table
       projectTable: [],
       // 物资信息table
-      engTable: [1,2,3],
+      engTable: [],
       // 项目信息分页配置项
       pageConfig: {
         pageNum: 1,
@@ -409,6 +416,21 @@ export default {
         this.pageConfig.total = res.data.total;
       })
     },
+    // 获取工程的物资信息
+    getBatchData(){
+      this.$axios({
+        method: "GET",
+        url: "/api/v1/materialBatchOperateRecords",
+        params: {
+          engineeringId: this.engineeringID,
+          typeName: this.typeName,
+          types: "2,3"
+        }
+      }).then(res=>{
+        this.engTable = res.data.list;
+        this.endPageConfig.total = res.data.total;
+      })
+    },
     // tab切换触发
     cutTabs(){
       switch (this.activeIndex) {
@@ -419,6 +441,7 @@ export default {
           this.getProjectListData()
           break;
         case "3":
+          this.getBatchData()
           break;
       }
     },
@@ -448,6 +471,11 @@ export default {
           })
         })
       })
+    },
+    // 切换页码
+    cutPage(e, val, fn){
+      this[val].pageNum = e;
+      this[fn]();
     },
     // 发票管理
     toInvoice(scope){
