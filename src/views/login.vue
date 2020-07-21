@@ -87,19 +87,10 @@ export default {
     toLogin(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.$axios({
-            method: "POST",
-            url: "/api/v1/login/noPic",
-            data: {
-              username: this.userForm.username,
-              password: this.userForm.password
-            }
-          }).then(res=>{
-            localStorage.setItem("token", res.data.token);
-            this.rememberPwd();
-            this.$router.push("/");
-            this.$message.success("登录成功，欢迎用户" + this.userForm.username);
-          })
+          // localStorage.setItem("token", res.data.token);
+          this.rememberPwd();
+          this.$router.push("/");
+          this.$message.success("登录成功，欢迎用户" + this.userForm.username);
         }
       });
     }

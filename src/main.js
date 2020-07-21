@@ -18,7 +18,7 @@ for (var m in filters) {
   Vue.filter(m, filters[m]);
 }
 
-new Vue({
+new Vue({ 
   router,
   store,
   render: h => h(App)
