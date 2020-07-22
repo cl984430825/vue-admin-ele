@@ -11,9 +11,7 @@ export default {
     // 请求拦截器
     this.$axios.interceptors.request.use(
       config => {
-        this.$openLoad(true)
-        // 请求头携带token
-        config.headers['token'] = localStorage.getItem("token");
+        this.$openLoad(true);
         return config;
       },
       error => {
@@ -28,14 +26,6 @@ export default {
       },
       error => {
         this.$openLoad(false)
-        if(error.response.status == 401){
-          this.$message.error("登录超时，请重新登录。")
-          this.$router.push("/login");
-        }else if(error.response.status == 403){
-          this.$message.error("没有该模块的操作权限。")
-        }else if(error.response.status == 400){
-          this.$message.error(error.response.data.message)
-        }
         return Promise.reject(error);
       }
     );
