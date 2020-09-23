@@ -64,18 +64,6 @@ export default {
               router: "/engineering/project"
             }
           ]
-        },
-        {
-          id: "2",
-          title: "系统管理",
-          icon: "el-icon-s-cooperation",
-          children: [
-            {
-              id: "3-1",
-              title: "角色管理",
-              router: "/system/role"
-            }
-          ]
         }
       ],
       // 侧边栏展开收缩model

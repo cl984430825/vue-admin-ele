@@ -1,8 +1,6 @@
 // Element-ui按需引入
 import Vue from "vue";
 import {
-  Tabs,
-  TabPane,
   Container,
   Aside,
   Header,
@@ -11,7 +9,6 @@ import {
   MenuItem,
   Submenu,
   MenuItemGroup,
-  Tooltip,
   Dropdown,
   RadioGroup,
   RadioButton,
@@ -20,47 +17,31 @@ import {
   MessageBox,
   Message,
   Form,
-  Table,
   Radio,
   Input,
-  Dialog,
-  Select,
-  Option,
   Button,
-  Divider,
   Loading,
   Checkbox,
   FormItem,
-  DatePicker,
   Pagination,
   Breadcrumb,
-  TableColumn,
   InputNumber,
   BreadcrumbItem
 } from "element-ui";
 
 Vue.use(Container)
-  .use(Tabs)
-  .use(TabPane)
   .use(Aside)
   .use(Header)
   .use(Main)
   .use(Menu)
   .use(Radio)
-  .use(Table)
-  .use(Dialog)
-  .use(Select)
-  .use(Option)
-  .use(Divider)
   .use(MenuItem)
   .use(Submenu)
-  .use(DatePicker)
   .use(Pagination)
   .use(RadioGroup)
   .use(RadioButton)
   .use(InputNumber)
   .use(MenuItemGroup)
-  .use(Tooltip)
   .use(Dropdown)
   .use(DropdownMenu)
   .use(DropdownItem)
@@ -70,7 +51,6 @@ Vue.use(Container)
   .use(Button)
   .use(Checkbox)
   .use(Breadcrumb)
-  .use(TableColumn)
   .use(BreadcrumbItem)
   .use(Loading.directive);
 

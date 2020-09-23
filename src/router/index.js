@@ -60,26 +60,6 @@ export default new Router({
               }
             }
           ]
-        },
-        {
-          path: "/system",
-          name: "system",
-          component: resolve => require(["@/views/container/system/index.vue"], resolve),
-          redirect: { name: "role" },
-          meta: {
-            title: "系统管理"
-          },
-          children: [
-            {
-              path: "/system/role",
-              name: "role",
-              component: resolve => require(["@/views/container/system/role.vue"], resolve),
-              meta: {
-                id: "3-1",
-                title: "角色管理"
-              }
-            }
-          ]
         }
       ]
     }

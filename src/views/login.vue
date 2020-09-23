@@ -87,7 +87,6 @@ export default {
     toLogin(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          // localStorage.setItem("token", res.data.token);
           this.rememberPwd();
           this.$router.push("/");
           this.$message.success("登录成功，欢迎用户" + this.userForm.username);
@@ -98,7 +97,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 #login {
   width: 100vw;
   height: 100vh;
